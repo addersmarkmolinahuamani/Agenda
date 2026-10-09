@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PlanSync - Agenda & Planificador de Pendientes</title>
+  <title>Agenda - Planificador de Pendientes</title>
   <meta name="description" content="Planificador inteligente de pendientes con vista cronológica y calendario interactivo, sincronizado con Supabase.">
   
   <!-- PWA & Mobile Web App Meta Tags -->
@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#6366f1">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="PlanSync">
+  <meta name="apple-mobile-web-app-title" content="Agenda">
   <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%236366f1'/><path d='M150 260l70 70 150-150' stroke='%23ffffff' stroke-width='48' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
 
   <!-- Fuentes Google -->
@@ -40,7 +40,7 @@
           </svg>
         </div>
         <div>
-          <h1 class="brand-title">Plan<span class="gradient-text">Sync</span></h1>
+          <h1 class="brand-title">Agenda</h1>
           <p class="brand-subtitle" id="current-date-display">Cargando fecha actual...</p>
         </div>
       </div>
@@ -76,8 +76,26 @@
         </div>
       </div>
 
-      <!-- BOTONES DE ACCIÓN DEL HEADER: NUBE & NUEVO PENDIENTE -->
+      <!-- BOTONES DE ACCIÓN DEL HEADER: TEMA, NUBE & NUEVO PENDIENTE -->
       <div class="header-actions">
+        <!-- Botón Selector Modo Claro / Oscuro -->
+        <button id="btn-theme-toggle" class="theme-toggle-btn" title="Alternar entre modo claro y oscuro" aria-label="Cambiar tema de color">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+
         <!-- Indicador de conexión a la nube (Supabase) -->
         <button id="btn-sync-settings" class="sync-status-btn" title="Configurar sincronización en la nube con Supabase">
           <span class="sync-dot dot-offline" id="sync-dot"></span>

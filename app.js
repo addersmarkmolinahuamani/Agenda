@@ -12,6 +12,7 @@
   // ==========================================
   const STORAGE_KEY = 'plansync_tasks_v1';
   const CLOUD_CONFIG_KEY = 'plansync_supabase_config';
+  const THEME_KEY = 'agenda_theme';
 
   // Credenciales por defecto de Supabase vinculadas
   const DEFAULT_SUPABASE_URL = 'https://jzwjudqysrnhevpcqjqu.supabase.co';
@@ -29,6 +30,7 @@
     calendarDate: new Date(),
     selectedCalendarDate: formatDateToISO(new Date()),
     editingTaskId: null,
+    theme: 'dark',
     
     // Supabase
     supabaseClient: null,
@@ -41,6 +43,11 @@
   // ==========================================
   const DOM = {
     currentDateDisplay: document.getElementById('current-date-display'),
+    
+    // Theme
+    btnThemeToggle: document.getElementById('btn-theme-toggle'),
+    sunIcon: document.querySelector('.sun-icon'),
+    moonIcon: document.querySelector('.moon-icon'),
     
     // View Switchers
     btnViewRows: document.getElementById('btn-view-rows'),
@@ -148,6 +155,7 @@
   // INICIALIZACIÓN
   // ==========================================
   async function init() {
+    initTheme();
     registerServiceWorker();
     renderCurrentHeaderDate();
     loadLocalTasks();
@@ -156,6 +164,36 @@
 
     // Intentar inicializar Supabase si ya hay credenciales guardadas
     await initSupabaseFromStorage();
+  }
+
+  // ==========================================
+  // GESTIÓN DE TEMAS (CLARO / OSCURO)
+  // ==========================================
+  function initTheme() {
+    const savedTheme = localStorage.getItem(THEME_KEY) || 'dark';
+    setTheme(savedTheme, false);
+  }
+
+  function setTheme(theme, notify = true) {
+    STATE.theme = theme;
+    localStorage.setItem(THEME_KEY, theme);
+
+    if (theme === 'light') {
+      document.body.classList.add('light-theme');
+      if (DOM.sunIcon) DOM.sunIcon.classList.add('hidden');
+      if (DOM.moonIcon) DOM.moonIcon.classList.remove('hidden');
+      if (notify) showToast('Modo Claro activado ☀️', 'info');
+    } else {
+      document.body.classList.remove('light-theme');
+      if (DOM.sunIcon) DOM.sunIcon.classList.remove('hidden');
+      if (DOM.moonIcon) DOM.moonIcon.classList.add('hidden');
+      if (notify) showToast('Modo Oscuro activado 🌙', 'info');
+    }
+  }
+
+  function toggleTheme() {
+    const nextTheme = STATE.theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme, true);
   }
 
   function registerServiceWorker() {
@@ -550,6 +588,11 @@
   // EVENT LISTENERS & VINCULACIÓN
   // ==========================================
   function bindEvents() {
+    // Alternar Tema Claro / Oscuro
+    if (DOM.btnThemeToggle) {
+      DOM.btnThemeToggle.addEventListener('click', toggleTheme);
+    }
+
     // Cambio de Vista
     DOM.btnViewRows.addEventListener('click', () => switchView('rows'));
     DOM.btnViewCalendar.addEventListener('click', () => switchView('calendar'));

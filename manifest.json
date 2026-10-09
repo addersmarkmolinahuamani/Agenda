@@ -1,6 +1,6 @@
 {
-  "name": "PlanSync - Agenda & Pendientes",
-  "short_name": "PlanSync",
+  "name": "Agenda",
+  "short_name": "Agenda",
   "description": "Planificador inteligente de pendientes con vista cronológica y calendario.",
   "start_url": "./index.html",
   "display": "standalone",
