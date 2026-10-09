@@ -1,10 +1,10 @@
-// Service Worker básico para permitir instalación como PWA en móviles y modo offline
-const CACHE_NAME = 'plansync-v1';
+// Service Worker con estrategia Network-First para actualizaciones inmediatas
+const CACHE_NAME = 'agenda-v2';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css',
-  './app.js',
+  './styles.css?v=2',
+  './app.js?v=2',
   './manifest.json'
 ];
 
@@ -27,11 +27,23 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  // Ignorar peticiones a Supabase o CDN para no bloquear APIs externas
+  // Ignorar peticiones a Supabase o CDN
   if (e.request.url.includes('supabase.co') || e.request.url.includes('jsdelivr')) {
     return;
   }
+
+  // Network-First: busca siempre la versión más reciente en GitHub
   e.respondWith(
-    caches.match(e.request).then((response) => response || fetch(e.request))
+    fetch(e.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(e.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
