@@ -694,15 +694,18 @@ body.light-theme .filter-pill:hover {
    ========================================================================== */
 .rows-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: minmax(0, 1fr) 380px;
   gap: 24px;
   align-items: start;
+  min-width: 0;
+  width: 100%;
 }
 
 .rows-main-column {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  min-width: 0;
 }
 
 /* Grupos de Pendientes */
@@ -1272,9 +1275,11 @@ body.light-theme .btn-assign-date-pill {
    ========================================================================== */
 .calendar-layout {
   display: grid;
-  grid-template-columns: 1fr 380px;
+  grid-template-columns: minmax(0, 1fr) 380px;
   gap: 24px;
   align-items: start;
+  min-width: 0;
+  width: 100%;
 }
 
 .calendar-main-card {
@@ -1285,6 +1290,10 @@ body.light-theme .btn-assign-date-pill {
   border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: var(--shadow-md);
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .calendar-controls {
@@ -1292,12 +1301,14 @@ body.light-theme .btn-assign-date-pill {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
+  min-width: 0;
 }
 
 .calendar-nav-left {
   display: flex;
   align-items: center;
   gap: 14px;
+  min-width: 0;
 }
 
 .cal-nav-btn {
@@ -1312,6 +1323,7 @@ body.light-theme .btn-assign-date-pill {
   justify-content: center;
   cursor: pointer;
   transition: all var(--transition-fast);
+  flex-shrink: 0;
 }
 
 body.light-theme .cal-nav-btn {
@@ -1338,14 +1350,18 @@ body.light-theme .cal-nav-btn:hover {
   font-weight: 800;
   letter-spacing: -0.02em;
   text-transform: capitalize;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .calendar-weekdays-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 10px;
   text-align: center;
+  width: 100%;
 }
 
 .cal-weekday {
@@ -1355,12 +1371,17 @@ body.light-theme .cal-nav-btn:hover {
   letter-spacing: 0.05em;
   color: var(--text-dim);
   padding: 6px 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .calendar-days-grid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 8px;
+  width: 100%;
 }
 
 .cal-day-cell {
@@ -1368,13 +1389,17 @@ body.light-theme .cal-nav-btn:hover {
   background: rgba(15, 23, 42, 0.55);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 8px;
+  padding: 8px 6px;
   display: flex;
   flex-direction: column;
   gap: 4px;
   cursor: pointer;
   transition: all var(--transition-fast);
   position: relative;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 body.light-theme .cal-day-cell {
@@ -1417,6 +1442,9 @@ body.light-theme .cal-day-cell.other-month {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
 }
 
 .cal-day-number {
@@ -1424,6 +1452,7 @@ body.light-theme .cal-day-cell.other-month {
   font-size: 0.92rem;
   font-weight: 700;
   color: var(--text-muted);
+  flex-shrink: 0;
 }
 
 .cal-day-cell.is-today .cal-day-number {
@@ -1437,6 +1466,8 @@ body.light-theme .cal-day-cell.other-month {
   color: #fff;
   padding: 1px 6px;
   border-radius: var(--radius-full);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .cal-day-tasks {
@@ -1445,6 +1476,8 @@ body.light-theme .cal-day-cell.other-month {
   gap: 3px;
   overflow: hidden;
   flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
 .cal-task-chip {
@@ -1460,12 +1493,33 @@ body.light-theme .cal-day-cell.other-month {
   gap: 4px;
   background: rgba(30, 41, 59, 0.9);
   color: var(--text-main);
-  border-left: 2px solid var(--accent-primary);
+  border-left: 3px solid var(--accent-primary);
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 body.light-theme .cal-task-chip {
   background: #f1f5f9;
   color: #1e293b;
+}
+
+.cal-task-chip span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  width: 100%;
+  flex: 1;
+}
+
+.cal-task-chip small {
+  font-weight: 700;
+  opacity: 0.85;
+  margin-right: 3px;
+  flex-shrink: 0;
 }
 
 .cal-task-chip.priority-high { border-left-color: var(--color-rose); }
@@ -1482,9 +1536,14 @@ body.light-theme .cal-task-chip {
 .cal-more-chip {
   font-size: 0.68rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--accent-primary);
   text-align: right;
-  padding-right: 4px;
+  padding-right: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  width: 100%;
 }
 
 /* Panel Lateral del Calendario */
@@ -2078,12 +2137,20 @@ body.light-theme .toast {
   }
 
   .calendar-main-card {
-    padding: 14px 10px;
+    padding: 12px 6px;
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
   }
 
   .calendar-controls {
     flex-direction: column;
     gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .calendar-month-title {
+    font-size: 1.25rem;
   }
 
   .calendar-nav-left {
@@ -2101,31 +2168,91 @@ body.light-theme .toast {
   }
 
   .calendar-weekdays-grid {
-    gap: 4px;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
+    margin-bottom: 6px;
+    width: 100%;
   }
 
   .cal-weekday {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
+    padding: 4px 0;
+    letter-spacing: 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .calendar-days-grid {
-    gap: 4px;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 3px;
+    width: 100%;
   }
 
   .cal-day-cell {
-    min-height: 65px;
-    padding: 4px 2px;
+    min-height: 68px;
+    padding: 4px 3px;
     border-radius: 6px;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .cal-day-header {
+    gap: 2px;
+    margin-bottom: 2px;
+    min-width: 0;
+    width: 100%;
   }
 
   .cal-day-number {
-    font-size: 0.8rem;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+  }
+
+  .cal-today-badge {
+    font-size: 0.58rem;
+    padding: 0 4px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .cal-day-tasks {
+    gap: 2px;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .cal-task-chip {
     font-size: 0.62rem;
-    padding: 1px 2px;
-    border-radius: 2px;
+    padding: 1px 3px;
+    border-radius: 3px;
+    border-left-width: 2px;
+    height: 18px;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .cal-task-chip span {
+    font-size: 0.62rem;
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .cal-more-chip {
+    font-size: 0.6rem;
+    padding: 0;
+    text-align: center;
+    min-width: 0;
+    width: 100%;
   }
 
   .toast-container {
@@ -2136,5 +2263,70 @@ body.light-theme .toast {
 
   .toast {
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-container {
+    padding: 10px 6px 30px;
+  }
+
+  .calendar-main-card {
+    padding: 10px 4px;
+    border-radius: var(--radius-md);
+  }
+
+  .calendar-month-title {
+    font-size: 1.15rem;
+  }
+
+  .calendar-weekdays-grid {
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+
+  .cal-weekday {
+    font-size: 0.65rem;
+    padding: 2px 0;
+  }
+
+  .calendar-days-grid {
+    gap: 2px;
+  }
+
+  .cal-day-cell {
+    min-height: 58px;
+    padding: 3px 2px;
+    border-radius: 4px;
+  }
+
+  .cal-day-number {
+    font-size: 0.72rem;
+  }
+
+  .cal-today-badge {
+    font-size: 0.5rem;
+    padding: 0 2px;
+  }
+
+  .cal-task-chip {
+    font-size: 0.56rem;
+    padding: 0 2px;
+    height: 15px;
+    border-left-width: 2px;
+  }
+
+  .cal-task-chip span {
+    font-size: 0.56rem;
+  }
+
+  .cal-more-chip {
+    font-size: 0.54rem;
+  }
+
+  .selected-day-card,
+  .calendar-nodate-drawer {
+    padding: 14px 10px;
+    border-radius: var(--radius-md);
   }
 }
