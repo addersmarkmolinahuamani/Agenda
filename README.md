@@ -1,50 +1,44 @@
-# 📅 PlanSync - Agenda & Planificador de Pendientes
+# 📅 PlanSync - Agenda & Planificador de Pendientes (Móvil & PC)
 
-Una aplicación web moderna, elegante y fluida diseñada para organizar tus tareas y pendientes de forma visual y productiva.
-
----
-
-## ✨ Características Principales
-
-### 1. Dos Modos de Visualización
-- **📋 Vista en Filas (Cronológica)**:
-  - **Próximos a cumplir en la parte superior**: Las tareas con fecha límite están ordenadas de forma ascendente estricta; las fechas más inminentes (Hoy, Mañana, esta semana) aparecen primero arriba.
-  - **Detección inteligente de vencimiento**: Tareas atrasadas se resaltan de manera destacada para no perder ningún plazo.
-  - **Bandeja de pendientes sin fecha (Backlog flexible)**: Panel dedicado para tareas que puedes realizar en cualquier momento, con ingreso rápido en 1 segundo y botón para asignarles fecha cuando decidas programarlas.
-  - **Historial de realizados**: Sección colapsable que agrupa tus logros completados.
-
-- **🗓️ Vista de Calendario Interactivo**:
-  - Cuadrícula mensual con navegación fluida entre meses y botón para volver a **"Hoy"**.
-  - Indicadores y chips de tareas en cada celda del día con códigos de color según prioridad.
-  - Panel lateral interactivo: al seleccionar un día, visualiza todos los compromisos agendados y añade nuevos pendientes con un clic en esa fecha exacta.
-  - Bandeja para agendar tareas sin fecha directamente en el día seleccionado.
-
-### 2. Gestión Completa de Pendientes
-- **Pendientes con fecha y hora**: Selector intuitivo con opción de hora específica.
-- **Pendientes sin fecha**: Interruptor activo para tareas atemporales o ideas a futuro.
-- **Niveles de Prioridad**: 🔥 Alta, ⚡ Media y 🌿 Baja con indicadores visuales en cada tarjeta.
-- **Categorías**: 💼 Trabajo, 🏠 Personal, 📚 Estudio, 🩺 Salud, 💰 Finanzas y ✨ General.
-- **Marcar como realizado**: Checkbox animado con sonido armónico (sintetizado mediante Web Audio API) y animación de confeti.
-- **Edición y Eliminación**: Modificación rápida de cualquier detalle o notas adicionales.
-- **Filtros y Búsqueda en tiempo real**: Busca por texto y filtra por estado o prioridad.
+Planificador inteligente de pendientes sincronizado en la nube con **Supabase** y listo para publicar gratis en **GitHub Pages** para usarlo en tu celular como una App nativa (PWA).
 
 ---
 
-## 🚀 Cómo Usar la Aplicación
+## 📱 Cómo sincronizar con tu Celular y Supabase
 
-No requiere instalaciones complejas ni dependencias externas. Puedes abrirla de dos formas:
-
-### Opción 1: Directamente en tu navegador
-Haz doble clic sobre el archivo `index.html` en la carpeta del proyecto o ábrelo arrastrándolo a Chrome, Edge o Firefox.
-
-### Opción 2: Con servidor local (Python)
-Si prefieres servirla vía HTTP:
-```bash
-python -m http.server 8080
-```
-Y abre en tu navegador: [http://localhost:8080](http://localhost:8080)
+### Paso 1: Configurar la base de datos en Supabase (1 minuto)
+1. Ve a tu cuenta en [Supabase](https://supabase.com) y entra a tu proyecto (o crea uno nuevo gratuito).
+2. En el menú lateral izquierdo, haz clic en **SQL Editor**.
+3. Abre el archivo [supabase_setup.sql](file:///c:/Users/acer/Desktop/Antigravity/Agenda/supabase_setup.sql), copia todo su contenido, pégalo en el editor de Supabase y presiona **RUN**.
+4. Ve a **Project Settings > API** (icono de engranaje) y copia:
+   - **Project URL** (ej: `https://xyzabcdefg.supabase.co`)
+   - **anon public key** (clave pública larga que empieza por `eyJ...`)
 
 ---
 
-## 💾 Persistencia de Datos
-Tus tareas se guardan automáticamente en el almacenamiento local del navegador (`localStorage`), de modo que nunca perderás tus pendientes al recargar o cerrar la página.
+### Paso 2: Publicar en GitHub Pages para abrirlo desde tu Celular
+1. Crea un nuevo repositorio en tu cuenta de [GitHub](https://github.com/new) (ejemplo: `mi-agenda`).
+2. En la terminal dentro de esta carpeta, conecta y sube el proyecto:
+   ```powershell
+   git remote add origin https://github.com/TU_USUARIO/mi-agenda.git
+   git push -u origin main
+   ```
+3. En tu repositorio en GitHub, ve a **Settings > Pages**.
+4. En **Branch**, selecciona `main` y carpeta `/ (root)`, luego haz clic en **Save**.
+5. En unos segundos, GitHub te dará un enlace público HTTPS:
+   `https://TU_USUARIO.github.io/mi-agenda/`
+
+---
+
+### Paso 3: Conectar la Nube en tu Celular o PC
+1. Abre el enlace en tu celular (Chrome o Safari) o en tu computadora.
+2. Haz clic en el botón superior **"Modo Local / ☁️"**.
+3. Pega tu **Project URL** y tu **Anon Key** de Supabase y presiona **"Conectar y Sincronizar"**.
+4. ¡Listo! Cualquier pendiente que ingreses, marques como realizado o modifiques se sincronizará al instante en ambos dispositivos en tiempo real.
+
+---
+
+### 📲 Cómo instalarlo como App en tu Celular (PWA)
+* **En Android (Chrome)**: Abre el enlace, toca el menú de los 3 puntos (⋮) y selecciona **"Agregar a la pantalla principal"** o **"Instalar aplicación"**.
+* **En iPhone (Safari)**: Abre el enlace, toca el botón de Compartir (icono con flecha hacia arriba) y selecciona **"Agregar al inicio"** (+).
+* Tendrá su propio icono, pantalla completa sin barra de navegación y funcionará de manera rápida y fluida.
