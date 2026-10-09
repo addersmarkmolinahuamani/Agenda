@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="styles.css?v=13">
+  <link rel="stylesheet" href="styles.css?v=14">
   <script>
     try {
       if (localStorage.getItem('agenda_auth_session')) {
@@ -172,9 +172,7 @@
           <!-- 1. Botón Cambiar Contraseña / Mi Cuenta (Llave Azul) -->
           <button id="btn-change-password" class="header-icon-btn btn-icon-key" title="Mi Cuenta y Contraseña" aria-label="Cambiar contraseña">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="15" cy="9" r="5"/>
-              <circle cx="15" cy="9" r="1.5"/>
-              <path d="M7.5 14.5L3 19v2h2l1-1h2l1-1v-2l1.5-1.5"/>
+              <path d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
             </svg>
           </button>
 
@@ -600,9 +598,7 @@
         <div class="modal-title-box">
           <div class="modal-icon-pill bg-blue">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="15" cy="9" r="5"/>
-              <circle cx="15" cy="9" r="1.5"/>
-              <path d="M7.5 14.5L3 19v2h2l1-1h2l1-1v-2l1.5-1.5"/>
+              <path d="M15.75 5.25a3 3 0 0 1 3 3m3 0a6 6 0 0 1-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1 1 21.75 8.25Z" />
             </svg>
           </div>
           <h2 id="password-modal-title">Mi Cuenta y Contraseña</h2>
@@ -654,17 +650,15 @@
         <div class="admin-add-box">
           <div class="form-group">
             <label for="admin-client-email">Correo del Cliente <span class="required-star">*</span></label>
-            <input type="email" id="admin-client-email" placeholder="cliente@correo.com">
+            <input type="email" id="admin-client-email" placeholder="cliente@correo.com" autocomplete="off">
           </div>
-          <div class="form-row-two-col">
-            <div class="form-group">
-              <label for="admin-client-name">Nombre / Negocio</label>
-              <input type="text" id="admin-client-name" placeholder="ej. Carlos Mendoza">
-            </div>
-            <div class="form-group">
-              <label for="admin-client-pass">Contraseña Inicial <span class="required-star">*</span></label>
-              <input type="text" id="admin-client-pass" placeholder="ej. 123456" value="123456">
-            </div>
+          <div class="form-group">
+            <label for="admin-client-name">Nombre / Negocio</label>
+            <input type="text" id="admin-client-name" placeholder="ej. Carlos Mendoza" autocomplete="off">
+          </div>
+          <div class="form-group">
+            <label for="admin-client-pass">Contraseña Inicial <span class="required-star">*</span></label>
+            <input type="text" id="admin-client-pass" placeholder="ej. 123456" value="123456" autocomplete="off">
           </div>
           <button type="button" id="btn-admin-add-client" class="btn-primary btn-add-client-license">
             <span>+ Autorizar Nuevo Cliente</span>
@@ -687,6 +681,6 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- App Script -->
-  <script src="app.js?v=13"></script>
+  <script src="app.js?v=14"></script>
 </body>
 </html>

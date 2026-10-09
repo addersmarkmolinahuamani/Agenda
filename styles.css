@@ -1730,11 +1730,16 @@ body.light-theme .cloud-status-box {
 }
 
 .form-group input[type="text"],
+.form-group input[type="email"],
 .form-group input[type="url"],
 .form-group input[type="password"],
 .form-group textarea,
 .form-select,
 .form-subgroup input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   background: var(--bg-glass-input);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
@@ -2827,6 +2832,70 @@ body.light-theme .client-card-item {
   font-size: 0.82rem;
   line-height: 1.45;
 }
+
+/* ================= RESPONSIVE MODAL & ADMIN PANEL ================= */
+@media (max-width: 580px) {
+  .form-row-two-col {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 12px 10px;
+  }
+
+  #password-modal .modal-card {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 22px;
+    margin: 0;
+  }
+
+  #password-modal .modal-header {
+    padding: 14px 16px;
+  }
+
+  #password-modal .modal-form {
+    padding: 16px 14px;
+    gap: 14px;
+  }
+
+  .admin-panel {
+    padding: 0 14px 20px 14px;
+  }
+
+  .admin-add-box {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .admin-panel-header {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .admin-panel-title {
+    font-size: 0.98rem;
+  }
+
+  .admin-panel-subtitle {
+    font-size: 0.76rem;
+  }
+
+  .client-card-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .client-card-item .btn-revoke-client {
+    align-self: flex-end;
+  }
+}
+
 
 
 
