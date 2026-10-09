@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="styles.css?v=10">
+  <link rel="stylesheet" href="styles.css?v=11">
   <script>
     try {
       if (localStorage.getItem('agenda_auth_session')) {
@@ -168,32 +168,52 @@
 
       <!-- BOTONES DE ACCIÓN DEL HEADER: TEMA, NUBE & NUEVO PENDIENTE -->
       <div class="header-actions">
-        <!-- Botón Selector Modo Claro / Oscuro -->
-        <button id="btn-theme-toggle" class="theme-toggle-btn" title="Alternar entre modo claro y oscuro" aria-label="Cambiar tema de color">
-          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg class="moon-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
+        <div class="header-icons-group">
+          <!-- 1. Botón Cambiar Contraseña / Mi Cuenta (Llave Azul) -->
+          <button id="btn-change-password" class="header-icon-btn btn-icon-key" title="Mi Cuenta y Contraseña" aria-label="Cambiar contraseña">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="15" cy="9" r="5"/>
+              <circle cx="15" cy="9" r="1.5"/>
+              <path d="M7.5 14.5L3 19v2h2l1-1h2l1-1v-2l1.5-1.5"/>
+            </svg>
+          </button>
 
-        <!-- Botón Cerrar Sesión -->
-        <button id="btn-logout" class="theme-toggle-btn logout-header-btn" title="Cerrar sesión" aria-label="Cerrar sesión">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-            <polyline points="16 17 21 12 16 7"></polyline>
-            <line x1="21" y1="12" x2="9" y2="12"></line>
-          </svg>
-        </button>
+          <!-- 2. Botón Alternar Tema Claro / Oscuro (Luna Ámbar) -->
+          <button id="btn-theme-toggle" class="header-icon-btn btn-icon-theme" title="Alternar entre modo claro y oscuro" aria-label="Cambiar tema de color">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="moon-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+
+          <!-- 3. Botón Sincronizar en la Nube (Flechas Circulares) -->
+          <button id="btn-manual-sync" class="header-icon-btn btn-icon-sync" title="Sincronizar datos con la nube" aria-label="Sincronizar con la nube">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"></polyline>
+              <polyline points="1 20 1 14 7 14"></polyline>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+            </svg>
+          </button>
+
+          <!-- 4. Botón Cerrar Sesión (Puerta de Salida) -->
+          <button id="btn-logout" class="header-icon-btn btn-icon-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
 
         <button id="btn-open-new-task" class="btn-primary">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -571,12 +591,63 @@
     </div>
   </div>
 
+  <!-- ============================================== -->
+  <!-- MODAL: CAMBIAR CONTRASEÑA / MI CUENTA          -->
+  <!-- ============================================== -->
+  <div id="password-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-box">
+          <div class="modal-icon-pill bg-blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="15" cy="9" r="5"/>
+              <circle cx="15" cy="9" r="1.5"/>
+              <path d="M7.5 14.5L3 19v2h2l1-1h2l1-1v-2l1.5-1.5"/>
+            </svg>
+          </div>
+          <h2 id="password-modal-title">Mi Cuenta y Contraseña</h2>
+        </div>
+        <button id="password-modal-close-btn" class="modal-close-btn" aria-label="Cerrar modal">&times;</button>
+      </div>
+
+      <form id="password-change-form" class="modal-form">
+        <div class="account-info-box">
+          <span class="account-label">Usuario Conectado:</span>
+          <span id="account-email-display" class="account-email">cargando...</span>
+          <span class="account-badge">Licencia Activa ⭐</span>
+        </div>
+
+        <div class="form-group">
+          <label for="current-password-input">Contraseña Actual</label>
+          <input type="password" id="current-password-input" placeholder="Ingresa tu contraseña actual" required autocomplete="current-password">
+        </div>
+
+        <div class="form-group">
+          <label for="new-password-input">Nueva Contraseña</label>
+          <input type="password" id="new-password-input" placeholder="Mínimo 4 caracteres" required autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label for="confirm-password-input">Confirmar Nueva Contraseña</label>
+          <input type="password" id="confirm-password-input" placeholder="Repite la nueva contraseña" required autocomplete="new-password">
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="password-modal-cancel-btn" class="btn-secondary">Cancelar</button>
+          <button type="submit" id="btn-save-new-password" class="btn-primary">
+            <span>Guardar Contraseña</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICACIONES -->
   <div id="toast-container" class="toast-container"></div>
 
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- App Script -->
-  <script src="app.js?v=10"></script>
+  <script src="app.js?v=11"></script>
 </body>
 </html>

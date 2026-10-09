@@ -151,9 +151,20 @@
     authPasswordInput: document.getElementById('auth-password-input'),
     btnToggleAuthPassword: document.getElementById('btn-toggle-auth-password'),
     eyeOpenIcon: document.querySelector('.eye-open-icon'),
-    eyeClosedIcon: document.querySelector('.eye-closed-icon'),
     btnAuthSubmit: document.getElementById('btn-auth-submit'),
-    btnLogout: document.getElementById('btn-logout')
+    btnLogout: document.getElementById('btn-logout'),
+
+    // Botones de Cabecera & Modal de Contraseña
+    btnChangePassword: document.getElementById('btn-change-password'),
+    btnManualSync: document.getElementById('btn-manual-sync'),
+    passwordModal: document.getElementById('password-modal'),
+    passwordModalCloseBtn: document.getElementById('password-modal-close-btn'),
+    passwordModalCancelBtn: document.getElementById('password-modal-cancel-btn'),
+    passwordChangeForm: document.getElementById('password-change-form'),
+    currentPasswordInput: document.getElementById('current-password-input'),
+    newPasswordInput: document.getElementById('new-password-input'),
+    confirmPasswordInput: document.getElementById('confirm-password-input'),
+    accountEmailDisplay: document.getElementById('account-email-display')
   };
 
   // ==========================================
@@ -361,6 +372,99 @@
     localStorage.setItem(AUTHORIZED_USERS_KEY, JSON.stringify(list));
     return `Cliente ${clienteEmail} autorizado con éxito.`;
   };
+
+  // ==========================================
+  // MODAL: CAMBIAR CONTRASEÑA / MI CUENTA
+  // ==========================================
+  function openPasswordModal() {
+    if (!DOM.passwordModal) return;
+    const session = getAuthSession();
+    const email = (session && session.email) ? session.email : MASTER_EMAIL;
+    if (DOM.accountEmailDisplay) {
+      DOM.accountEmailDisplay.textContent = email;
+    }
+    if (DOM.currentPasswordInput) DOM.currentPasswordInput.value = '';
+    if (DOM.newPasswordInput) DOM.newPasswordInput.value = '';
+    if (DOM.confirmPasswordInput) DOM.confirmPasswordInput.value = '';
+    DOM.passwordModal.classList.remove('hidden');
+  }
+
+  function closePasswordModal() {
+    if (DOM.passwordModal) {
+      DOM.passwordModal.classList.add('hidden');
+    }
+  }
+
+  async function handlePasswordChangeSubmit(e) {
+    e.preventDefault();
+    if (!DOM.currentPasswordInput || !DOM.newPasswordInput || !DOM.confirmPasswordInput) return;
+
+    const currentPass = DOM.currentPasswordInput.value.trim();
+    const newPass = DOM.newPasswordInput.value.trim();
+    const confirmPass = DOM.confirmPasswordInput.value.trim();
+
+    const session = getAuthSession();
+    const email = (session && session.email) ? session.email : MASTER_EMAIL;
+
+    // Verificar contraseña actual
+    const isCurrentValid = await checkUserAuthorization(email, currentPass);
+    if (!isCurrentValid) {
+      showToast('La contraseña actual es incorrecta.', 'warning');
+      return;
+    }
+
+    if (newPass.length < 4) {
+      showToast('La nueva contraseña debe tener al menos 4 caracteres.', 'warning');
+      return;
+    }
+
+    if (newPass !== confirmPass) {
+      showToast('Las nuevas contraseñas no coinciden.', 'warning');
+      return;
+    }
+
+    // Guardar nueva contraseña
+    if (email.toLowerCase() === MASTER_EMAIL.toLowerCase()) {
+      localStorage.setItem('agenda_admin_password', newPass);
+    } else {
+      window.autorizarCliente(email, newPass);
+    }
+
+    closePasswordModal();
+    showToast('¡Contraseña actualizada exitosamente! 🔑', 'success');
+  }
+
+  // ==========================================
+  // BOTÓN DE SINCRONIZACIÓN MANUAL (NUBE)
+  // ==========================================
+  async function handleManualSync() {
+    if (!DOM.btnManualSync) return;
+    DOM.btnManualSync.classList.add('spinning');
+    showToast('Sincronizando con la nube... ☁️', 'info');
+
+    try {
+      if (STATE.supabaseClient) {
+        await pushAllTasksToCloud();
+        const { data, error } = await STATE.supabaseClient.from('tasks').select('*').limit(500);
+        if (!error && data) {
+          STATE.tasks = data.map(dbRowToTask);
+          saveLocalTasks();
+          renderAll();
+        }
+        showToast('¡Sincronización completada con la nube! ☁️', 'success');
+      } else {
+        await initSupabaseFromStorage();
+        showToast('¡Sincronizado con Supabase! ☁️', 'success');
+      }
+    } catch (err) {
+      console.warn('Error durante sincronización:', err);
+      showToast('Sincronizado localmente.', 'info');
+    } finally {
+      setTimeout(() => {
+        if (DOM.btnManualSync) DOM.btnManualSync.classList.remove('spinning');
+      }, 700);
+    }
+  }
 
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -821,6 +925,18 @@
     if (DOM.btnToggleAuthPassword) DOM.btnToggleAuthPassword.addEventListener('click', toggleAuthPassword);
     if (DOM.btnLogout) DOM.btnLogout.addEventListener('click', handleLogout);
 
+    // Botones de Cabecera: Llave (Password) & Sincronizar (Sync)
+    if (DOM.btnChangePassword) DOM.btnChangePassword.addEventListener('click', openPasswordModal);
+    if (DOM.passwordModalCloseBtn) DOM.passwordModalCloseBtn.addEventListener('click', closePasswordModal);
+    if (DOM.passwordModalCancelBtn) DOM.passwordModalCancelBtn.addEventListener('click', closePasswordModal);
+    if (DOM.passwordModal) {
+      DOM.passwordModal.addEventListener('click', (e) => {
+        if (e.target === DOM.passwordModal) closePasswordModal();
+      });
+    }
+    if (DOM.passwordChangeForm) DOM.passwordChangeForm.addEventListener('submit', handlePasswordChangeSubmit);
+    if (DOM.btnManualSync) DOM.btnManualSync.addEventListener('click', handleManualSync);
+
     DOM.btnResetFilters.addEventListener('click', resetAllFilters);
 
     // Clics en tarjetas de métricas para filtrar rápidamente
@@ -872,6 +988,7 @@
       if (e.key === 'Escape') {
         if (DOM.taskModal && !DOM.taskModal.classList.contains('hidden')) closeTaskModal();
         if (DOM.cloudModal && !DOM.cloudModal.classList.contains('hidden')) closeCloudModal();
+        if (DOM.passwordModal && !DOM.passwordModal.classList.contains('hidden')) closePasswordModal();
       }
     });
   }
