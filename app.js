@@ -13,6 +13,10 @@
   const STORAGE_KEY = 'plansync_tasks_v1';
   const CLOUD_CONFIG_KEY = 'plansync_supabase_config';
 
+  // Credenciales por defecto de Supabase vinculadas
+  const DEFAULT_SUPABASE_URL = 'https://jzwjudqysrnhevpcqjqu.supabase.co';
+  const DEFAULT_SUPABASE_KEY = 'sb_publishable_rkZVJt0njBc3MNX6dc5Zaw_G4HgKk4D';
+
   // ==========================================
   // ESTADO GLOBAL DE LA APLICACIÓN
   // ==========================================
@@ -174,19 +178,25 @@
   // CAPA DE SUPABASE & SINCRONIZACIÓN
   // ==========================================
   async function initSupabaseFromStorage() {
+    let url = DEFAULT_SUPABASE_URL;
+    let key = DEFAULT_SUPABASE_KEY;
+
     const savedConfig = localStorage.getItem(CLOUD_CONFIG_KEY);
-    if (!savedConfig) {
-      updateSyncStatusUI(false);
-      return;
+    if (savedConfig) {
+      try {
+        const parsed = JSON.parse(savedConfig);
+        if (parsed.url && parsed.key) {
+          url = parsed.url;
+          key = parsed.key;
+        }
+      } catch (e) {
+        console.warn('Configuración de Supabase inválida en almacenamiento local:', e);
+      }
     }
 
-    try {
-      const { url, key } = JSON.parse(savedConfig);
-      if (url && key) {
-        await connectToSupabase(url, key, false);
-      }
-    } catch (e) {
-      console.warn('Configuración de Supabase inválida en almacenamiento local:', e);
+    if (url && key) {
+      await connectToSupabase(url, key, false);
+    } else {
       updateSyncStatusUI(false);
     }
   }
