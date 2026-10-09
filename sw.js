@@ -1,10 +1,9 @@
-// Service Worker con estrategia Network-First para actualizaciones inmediatas
-const CACHE_NAME = 'agenda-v2';
+const CACHE_NAME = 'agenda-v3';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=2',
-  './app.js?v=2',
+  './styles.css?v=3',
+  './app.js?v=3',
   './manifest.json'
 ];
 
