@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="styles.css?v=12">
+  <link rel="stylesheet" href="styles.css?v=13">
   <script>
     try {
       if (localStorage.getItem('agenda_auth_session')) {
@@ -639,6 +639,45 @@
           </button>
         </div>
       </form>
+
+      <!-- PANEL DE ADMINISTRADOR: GESTIONAR LICENCIAS Y CLIENTES (Visible solo para adders.ammh@gmail.com) -->
+      <div id="admin-licenses-panel" class="admin-panel hidden">
+        <div class="admin-panel-divider"></div>
+        <div class="admin-panel-header">
+          <div class="admin-badge-icon">👥</div>
+          <div>
+            <h3 class="admin-panel-title">Gestión de Clientes y Licencias</h3>
+            <p class="admin-panel-subtitle">Concede acceso exclusivo a nuevos clientes. Sus datos y los tuyos estarán 100% aislados.</p>
+          </div>
+        </div>
+
+        <div class="admin-add-box">
+          <div class="form-group">
+            <label for="admin-client-email">Correo del Cliente <span class="required-star">*</span></label>
+            <input type="email" id="admin-client-email" placeholder="cliente@correo.com">
+          </div>
+          <div class="form-row-two-col">
+            <div class="form-group">
+              <label for="admin-client-name">Nombre / Negocio</label>
+              <input type="text" id="admin-client-name" placeholder="ej. Carlos Mendoza">
+            </div>
+            <div class="form-group">
+              <label for="admin-client-pass">Contraseña Inicial <span class="required-star">*</span></label>
+              <input type="text" id="admin-client-pass" placeholder="ej. 123456" value="123456">
+            </div>
+          </div>
+          <button type="button" id="btn-admin-add-client" class="btn-primary btn-add-client-license">
+            <span>+ Autorizar Nuevo Cliente</span>
+          </button>
+        </div>
+
+        <div class="admin-clients-section">
+          <h4 class="admin-clients-heading">Clientes con Licencia Activa</h4>
+          <div id="admin-clients-list" class="admin-clients-list">
+            <!-- Cargado dinámicamente -->
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -648,6 +687,6 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- App Script -->
-  <script src="app.js?v=12"></script>
+  <script src="app.js?v=13"></script>
 </body>
 </html>

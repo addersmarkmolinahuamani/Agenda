@@ -164,7 +164,13 @@
     currentPasswordInput: document.getElementById('current-password-input'),
     newPasswordInput: document.getElementById('new-password-input'),
     confirmPasswordInput: document.getElementById('confirm-password-input'),
-    accountEmailDisplay: document.getElementById('account-email-display')
+    accountEmailDisplay: document.getElementById('account-email-display'),
+    adminLicensesPanel: document.getElementById('admin-licenses-panel'),
+    adminClientEmailInput: document.getElementById('admin-client-email'),
+    adminClientNameInput: document.getElementById('admin-client-name'),
+    adminClientPassInput: document.getElementById('admin-client-pass'),
+    btnAdminAddClient: document.getElementById('btn-admin-add-client'),
+    adminClientsList: document.getElementById('admin-clients-list')
   };
 
   // ==========================================
@@ -248,6 +254,19 @@
     }
   }
 
+  let _sharedSupabaseClient = null;
+  function getSupabaseClient(url = DEFAULT_SUPABASE_URL, key = DEFAULT_SUPABASE_KEY) {
+    if (STATE.supabaseClient) return STATE.supabaseClient;
+    if (_sharedSupabaseClient) return _sharedSupabaseClient;
+    if (window.supabase && window.supabase.createClient && url && key) {
+      _sharedSupabaseClient = window.supabase.createClient(url.trim(), key.trim(), {
+        auth: { persistSession: false, autoRefreshToken: false }
+      });
+      return _sharedSupabaseClient;
+    }
+    return null;
+  }
+
   async function checkUserAuthorization(email, password) {
     const normalizedEmail = email.trim().toLowerCase();
 
@@ -283,10 +302,7 @@
 
     // 3. Verificación con Supabase (tabla authorized_users)
     try {
-      const client = STATE.supabaseClient || (window.supabase && window.supabase.createClient 
-        ? window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY) 
-        : null);
-
+      const client = getSupabaseClient();
       if (client) {
         const { data, error } = await client
           .from('authorized_users')
@@ -372,10 +388,7 @@
 
     // Guardar en Supabase si está disponible
     try {
-      const client = STATE.supabaseClient || (window.supabase && window.supabase.createClient 
-        ? window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY) 
-        : null);
-
+      const client = getSupabaseClient();
       if (client) {
         await client.from('authorized_users').upsert([{
           email: normalized,
@@ -402,6 +415,128 @@
     return `Cliente ${normalized} autorizado con éxito.`;
   };
 
+  // Revocar acceso a un cliente
+  window.revocarCliente = async function(clienteEmail) {
+    if (!clienteEmail) return;
+    const normalized = clienteEmail.trim().toLowerCase();
+
+    try {
+      const client = getSupabaseClient();
+      if (client) {
+        await client.from('authorized_users').delete().eq('email', normalized);
+      }
+    } catch (err) {
+      console.warn('Error eliminando de Supabase:', err);
+    }
+
+    let list = [];
+    try {
+      const saved = localStorage.getItem(AUTHORIZED_USERS_KEY);
+      if (saved) list = JSON.parse(saved);
+    } catch (e) {}
+    list = list.filter(u => (typeof u === 'string' ? u : u.email).toLowerCase() !== normalized);
+    localStorage.setItem(AUTHORIZED_USERS_KEY, JSON.stringify(list));
+    return true;
+  };
+
+  function renderAdminClientsList() {
+    if (!DOM.adminClientsList) return;
+    let list = [];
+    try {
+      const saved = localStorage.getItem(AUTHORIZED_USERS_KEY);
+      if (saved) list = JSON.parse(saved);
+    } catch (e) {}
+
+    list = list.map(item => {
+      if (typeof item === 'string') return { email: item, password: '***', nombre: 'Cliente' };
+      return item;
+    });
+
+    if (list.length === 0) {
+      DOM.adminClientsList.innerHTML = `
+        <div class="admin-empty-clients">
+          <span>Aún no tienes clientes registrados. Completa el formulario de arriba y haz clic en <strong>+ Autorizar Nuevo Cliente</strong>.</span>
+        </div>
+      `;
+      return;
+    }
+
+    DOM.adminClientsList.innerHTML = list.map(client => `
+      <div class="client-card-item">
+        <div class="client-info">
+          <div class="client-name-row">
+            <span class="client-name">${escapeHTML(client.nombre || 'Cliente')}</span>
+            <span class="client-active-badge">Licencia Activa</span>
+          </div>
+          <div class="client-details">
+            <span class="client-email">${escapeHTML(client.email)}</span>
+            <span class="client-pass-chip">Clave: <strong>${escapeHTML(client.password || '123456')}</strong></span>
+          </div>
+        </div>
+        <button type="button" class="btn-revoke-client" data-email="${escapeHTML(client.email)}" title="Revocar acceso a este cliente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          </svg>
+          <span>Revocar</span>
+        </button>
+      </div>
+    `).join('');
+
+    const revokeButtons = DOM.adminClientsList.querySelectorAll('.btn-revoke-client');
+    revokeButtons.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const email = btn.getAttribute('data-email');
+        if (confirm(`¿Estás seguro de revocar la licencia de acceso a "${email}"? No podrá volver a ingresar.`)) {
+          await window.revocarCliente(email);
+          renderAdminClientsList();
+          showToast(`Acceso revocado para ${email}`, 'info');
+        }
+      });
+    });
+  }
+
+  async function handleAdminAddClientSubmit() {
+    if (!DOM.adminClientEmailInput || !DOM.adminClientPassInput) return;
+    const email = DOM.adminClientEmailInput.value.trim();
+    const pass = DOM.adminClientPassInput.value.trim() || '123456';
+    const name = DOM.adminClientNameInput ? DOM.adminClientNameInput.value.trim() : 'Cliente';
+
+    if (!email || !email.includes('@')) {
+      showToast('Por favor ingresa un correo electrónico válido.', 'warning');
+      return;
+    }
+
+    if (pass.length < 4) {
+      showToast('La contraseña debe tener mínimo 4 caracteres.', 'warning');
+      return;
+    }
+
+    if (email.toLowerCase() === MASTER_EMAIL.toLowerCase()) {
+      showToast('Tu cuenta ya es la administradora maestra.', 'warning');
+      return;
+    }
+
+    if (DOM.btnAdminAddClient) {
+      DOM.btnAdminAddClient.disabled = true;
+      DOM.btnAdminAddClient.innerHTML = '<span>Autorizando...</span>';
+    }
+
+    await window.autorizarCliente(email, pass, name);
+
+    DOM.adminClientEmailInput.value = '';
+    DOM.adminClientPassInput.value = '123456';
+    if (DOM.adminClientNameInput) DOM.adminClientNameInput.value = '';
+
+    if (DOM.btnAdminAddClient) {
+      DOM.btnAdminAddClient.disabled = false;
+      DOM.btnAdminAddClient.innerHTML = '<span>+ Autorizar Nuevo Cliente</span>';
+    }
+
+    renderAdminClientsList();
+    showToast(`¡Cliente ${email} autorizado con éxito! 🎉`, 'success');
+  }
+
   // ==========================================
   // MODAL: CAMBIAR CONTRASEÑA / MI CUENTA
   // ==========================================
@@ -415,6 +550,15 @@
     if (DOM.currentPasswordInput) DOM.currentPasswordInput.value = '';
     if (DOM.newPasswordInput) DOM.newPasswordInput.value = '';
     if (DOM.confirmPasswordInput) DOM.confirmPasswordInput.value = '';
+
+    const isAdmin = email.toLowerCase() === MASTER_EMAIL.toLowerCase();
+    if (DOM.adminLicensesPanel) {
+      DOM.adminLicensesPanel.classList.toggle('hidden', !isAdmin);
+      if (isAdmin) {
+        renderAdminClientsList();
+      }
+    }
+
     DOM.passwordModal.classList.remove('hidden');
   }
 
@@ -483,7 +627,13 @@
           query = query.eq('user_email', userEmail);
         }
 
-        const { data, error } = await query.limit(500);
+        let { data, error } = await query.limit(500);
+        if (error && (error.code === 'PGRST100' || error.code === '42703' || (error.message && error.message.includes('user_email')))) {
+          const fallback = await STATE.supabaseClient.from('tasks').select('*').limit(500);
+          data = fallback.data;
+          error = fallback.error;
+        }
+
         if (!error && data) {
           STATE.tasks = data.map(dbRowToTask);
           saveLocalTasks();
@@ -556,10 +706,10 @@
     setCloudSyncingState(true);
 
     try {
-      const client = window.supabase.createClient(url.trim(), key.trim());
+      const client = getSupabaseClient(url, key);
       const userEmail = getCurrentUserEmail();
       
-      // Probar lectura de la tabla tasks filtrando exclusivamente por el usuario conectado
+      // Probar lectura de la tabla tasks filtrando por el usuario conectado
       let query = client.from('tasks').select('*');
       if (userEmail === MASTER_EMAIL.toLowerCase()) {
         query = query.or(`user_email.eq.${userEmail},user_email.is.null`);
@@ -567,7 +717,15 @@
         query = query.eq('user_email', userEmail);
       }
 
-      const { data, error } = await query.limit(500);
+      let { data, error } = await query.limit(500);
+
+      // Si la columna user_email no existe aún en Supabase (error 400 / PGRST100 / 42703)
+      if (error && (error.code === 'PGRST100' || error.code === '42703' || (error.message && error.message.includes('user_email')))) {
+        console.warn('Columna user_email no detectada aún en Supabase tasks. Modo compatible activado:', error.message);
+        const fallback = await client.from('tasks').select('*').limit(500);
+        data = fallback.data;
+        error = fallback.error;
+      }
 
       if (error) {
         throw error;
@@ -678,7 +836,12 @@
     if (!STATE.supabaseClient || !STATE.isCloudConnected) return;
     try {
       const rows = STATE.tasks.map(taskToDbRow);
-      await STATE.supabaseClient.from('tasks').upsert(rows);
+      const res = await STATE.supabaseClient.from('tasks').upsert(rows);
+      if (res && res.error && (res.error.code === 'PGRST100' || res.error.code === '42703' || (res.error.message && res.error.message.includes('user_email')))) {
+        console.warn('Tabla tasks sin columna user_email. Subiendo sin ese campo...');
+        const strippedRows = rows.map(({ user_email, ...rest }) => rest);
+        await STATE.supabaseClient.from('tasks').upsert(strippedRows);
+      }
     } catch (e) {
       console.error('Error subiendo tareas a la nube:', e);
     }
@@ -689,13 +852,16 @@
     try {
       if (action === 'upsert') {
         const row = taskToDbRow(task);
-        await STATE.supabaseClient.from('tasks').upsert([row]);
+        const res = await STATE.supabaseClient.from('tasks').upsert([row]);
+        if (res && res.error && (res.error.code === 'PGRST100' || res.error.code === '42703' || (res.error.message && res.error.message.includes('user_email')))) {
+          const { user_email, ...fallbackRow } = row;
+          await STATE.supabaseClient.from('tasks').upsert([fallbackRow]);
+        }
       } else if (action === 'delete') {
         await STATE.supabaseClient
           .from('tasks')
           .delete()
-          .eq('id', task.id)
-          .eq('user_email', getCurrentUserEmail());
+          .eq('id', task.id);
       }
     } catch (e) {
       console.error('Error sincronizando cambio en Supabase:', e);
@@ -1025,6 +1191,7 @@
       });
     }
     if (DOM.passwordChangeForm) DOM.passwordChangeForm.addEventListener('submit', handlePasswordChangeSubmit);
+    if (DOM.btnAdminAddClient) DOM.btnAdminAddClient.addEventListener('click', handleAdminAddClientSubmit);
     if (DOM.btnManualSync) DOM.btnManualSync.addEventListener('click', handleManualSync);
 
     DOM.btnResetFilters.addEventListener('click', resetAllFilters);
