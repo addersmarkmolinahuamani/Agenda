@@ -2163,3 +2163,343 @@ body.light-theme input:-webkit-autofill:focus {
   letter-spacing: 0.02em;
 }
 
+/* ==========================================================================
+   PORTADA DE ACCESO / LOGIN (AUTH SCREEN)
+   ========================================================================== */
+.auth-screen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background-color: var(--bg-primary);
+  overflow-y: auto;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Control de visibilidad instantánea según autenticación */
+.user-authenticated #auth-screen {
+  display: none !important;
+}
+
+html:not(.user-authenticated) .app-container {
+  display: none !important;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 28px;
+  padding: 36px 28px 28px;
+  box-shadow: 0 20px 45px -12px rgba(0, 0, 0, 0.15), 0 0 1px 1px rgba(0, 0, 0, 0.05);
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  animation: authCardEnter 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+body.light-theme .auth-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  box-shadow: 0 25px 50px -15px rgba(15, 23, 42, 0.09), 0 0 0 1px rgba(226, 232, 240, 0.55);
+}
+
+@keyframes authCardEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.auth-icon-box {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 16px;
+  border-radius: 20px;
+  background: #090e1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 24px -6px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  padding: 8px;
+  overflow: hidden;
+}
+
+.auth-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.auth-title {
+  font-family: var(--font-main);
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+body.light-theme .auth-title {
+  color: #0f172a;
+}
+
+.auth-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-dim);
+  font-weight: 500;
+  margin-bottom: 26px;
+}
+
+body.light-theme .auth-subtitle {
+  color: #64748b;
+}
+
+.auth-form {
+  text-align: left;
+  margin-bottom: 22px;
+}
+
+.auth-form-group {
+  margin-bottom: 16px;
+}
+
+.auth-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+
+body.light-theme .auth-label {
+  color: #64748b;
+}
+
+.auth-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.auth-field-icon {
+  position: absolute;
+  left: 14px;
+  width: 19px;
+  height: 19px;
+  color: #94a3b8;
+  pointer-events: none;
+  transition: color var(--transition-fast);
+}
+
+.auth-input {
+  width: 100%;
+  padding: 13px 14px 13px 44px;
+  background: var(--bg-glass-input);
+  border: 1.5px solid var(--border-subtle);
+  border-radius: 14px;
+  font-family: var(--font-main);
+  font-size: 0.95rem;
+  color: var(--text-main);
+  outline: none;
+  transition: all var(--transition-fast);
+}
+
+body.light-theme .auth-input {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.auth-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+}
+
+body.light-theme .auth-input:focus {
+  background: #ffffff;
+}
+
+.auth-input-wrapper:focus-within .auth-field-icon {
+  color: #3b82f6;
+}
+
+.auth-password-toggle {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: color var(--transition-fast);
+}
+
+.auth-password-toggle:hover {
+  color: var(--text-main);
+}
+
+body.light-theme .auth-password-toggle:hover {
+  color: #0f172a;
+}
+
+.auth-password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-auth-submit {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  font-family: var(--font-main);
+  font-size: 0.96rem;
+  font-weight: 700;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+  margin-top: 8px;
+}
+
+.btn-auth-submit:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.38);
+}
+
+.btn-auth-submit:active {
+  transform: translateY(0);
+}
+
+.btn-auth-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Tarjeta Promo Licencia de Pago Único */
+.auth-license-card {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(16, 185, 129, 0.22);
+  border-radius: 18px;
+  padding: 18px 16px;
+  text-align: center;
+  transition: all var(--transition-fast);
+}
+
+body.light-theme .auth-license-card {
+  background: #f0fdf4;
+  border: 1px solid rgba(16, 185, 129, 0.28);
+}
+
+.license-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #059669;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.license-star {
+  font-size: 0.9rem;
+}
+
+.license-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 14px;
+}
+
+body.light-theme .license-desc {
+  color: #475569;
+}
+
+.btn-whatsapp-license {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: #059669;
+  color: #ffffff !important;
+  font-family: var(--font-main);
+  font-size: 0.88rem;
+  font-weight: 700;
+  padding: 12px 18px;
+  border-radius: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.22);
+}
+
+.btn-whatsapp-license:hover {
+  background: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.32);
+}
+
+.btn-whatsapp-license:active {
+  transform: translateY(0);
+}
+
+.whatsapp-icon {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+
+/* Botón Logout en el Header */
+.logout-header-btn {
+  color: var(--text-dim);
+}
+
+.logout-header-btn:hover {
+  color: var(--color-rose) !important;
+  border-color: rgba(244, 63, 94, 0.4) !important;
+}
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 28px 18px 22px;
+    border-radius: 22px;
+  }
+
+  .auth-title {
+    font-size: 1.5rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.84rem;
+    margin-bottom: 22px;
+  }
+}
+
+

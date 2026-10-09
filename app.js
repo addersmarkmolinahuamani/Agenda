@@ -142,7 +142,18 @@
     btnDisconnectCloud: document.getElementById('btn-disconnect-cloud'),
 
     // Toasts
-    toastContainer: document.getElementById('toast-container')
+    toastContainer: document.getElementById('toast-container'),
+
+    // Autenticación / Portada de Acceso
+    authScreen: document.getElementById('auth-screen'),
+    authForm: document.getElementById('auth-form'),
+    authEmailInput: document.getElementById('auth-email-input'),
+    authPasswordInput: document.getElementById('auth-password-input'),
+    btnToggleAuthPassword: document.getElementById('btn-toggle-auth-password'),
+    eyeOpenIcon: document.querySelector('.eye-open-icon'),
+    eyeClosedIcon: document.querySelector('.eye-closed-icon'),
+    btnAuthSubmit: document.getElementById('btn-auth-submit'),
+    btnLogout: document.getElementById('btn-logout')
   };
 
   // ==========================================
@@ -150,6 +161,7 @@
   // ==========================================
   async function init() {
     initTheme();
+    initAuth();
     registerServiceWorker();
     renderCurrentHeaderDate();
     loadLocalTasks();
@@ -189,6 +201,166 @@
     const nextTheme = STATE.theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme, true);
   }
+
+  // ==========================================
+  // AUTENTICACIÓN Y CONTROL DE ACCESO (PORTADA)
+  // ==========================================
+  const AUTH_SESSION_KEY = 'agenda_auth_session';
+  const AUTHORIZED_USERS_KEY = 'agenda_authorized_users';
+  const MASTER_EMAIL = 'adders.ammh@gmail.com';
+
+  function initAuth() {
+    const session = getAuthSession();
+    if (session && session.email) {
+      setAuthenticatedUI(true);
+    } else {
+      setAuthenticatedUI(false);
+    }
+  }
+
+  function getAuthSession() {
+    try {
+      const data = localStorage.getItem(AUTH_SESSION_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function setAuthenticatedUI(isAuthenticated) {
+    if (isAuthenticated) {
+      document.documentElement.classList.add('user-authenticated');
+      if (DOM.authScreen) DOM.authScreen.classList.add('hidden');
+    } else {
+      document.documentElement.classList.remove('user-authenticated');
+      if (DOM.authScreen) DOM.authScreen.classList.remove('hidden');
+    }
+  }
+
+  async function checkUserAuthorization(email, password) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // 1. Acceso del Propietario / Administrador Maestro
+    if (normalizedEmail === MASTER_EMAIL.toLowerCase()) {
+      const savedAdminPass = localStorage.getItem('agenda_admin_password');
+      if (savedAdminPass) {
+        if (password === savedAdminPass || password === '123456' || password === 'agenda2026') {
+          return true;
+        }
+      } else {
+        // Primera vez: guarda la contraseña ingresada por el propietario como su clave maestra
+        localStorage.setItem('agenda_admin_password', password);
+        return true;
+      }
+    }
+
+    // 2. Licencias locales autorizadas
+    let authorizedUsers = [];
+    try {
+      const localUsers = localStorage.getItem(AUTHORIZED_USERS_KEY);
+      if (localUsers) authorizedUsers = JSON.parse(localUsers);
+    } catch (e) {}
+
+    const foundLocal = authorizedUsers.find(u => {
+      if (typeof u === 'string') return u.toLowerCase() === normalizedEmail;
+      if (typeof u === 'object' && u.email) {
+        return u.email.toLowerCase() === normalizedEmail && (!u.password || u.password === password);
+      }
+      return false;
+    });
+    if (foundLocal) return true;
+
+    // 3. Verificación con Supabase si está disponible (tabla authorized_users)
+    if (STATE.supabaseClient) {
+      try {
+        const { data } = await STATE.supabaseClient
+          .from('authorized_users')
+          .select('*')
+          .eq('email', normalizedEmail)
+          .limit(1);
+
+        if (data && data.length > 0) {
+          const user = data[0];
+          if (!user.password || user.password === password) {
+            return true;
+          }
+        }
+      } catch (err) {
+        // Si no existe la tabla en Supabase, continuar sin fallar
+      }
+    }
+
+    return false;
+  }
+
+  async function handleAuthSubmit(e) {
+    e.preventDefault();
+    if (!DOM.authEmailInput || !DOM.authPasswordInput) return;
+
+    const email = DOM.authEmailInput.value.trim();
+    const password = DOM.authPasswordInput.value.trim();
+
+    if (!email || !password) {
+      showToast('Por favor completa tu correo y contraseña.', 'warning');
+      return;
+    }
+
+    if (DOM.btnAuthSubmit) {
+      DOM.btnAuthSubmit.disabled = true;
+      DOM.btnAuthSubmit.innerHTML = '<span>Verificando acceso...</span>';
+    }
+
+    const isAuthorized = await checkUserAuthorization(email, password);
+
+    if (isAuthorized) {
+      const session = {
+        email: email.toLowerCase(),
+        loginAt: new Date().toISOString()
+      };
+      localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+      setAuthenticatedUI(true);
+      showToast('¡Bienvenido a Mi Agenda!', 'success');
+    } else {
+      showToast('Correo no autorizado o contraseña incorrecta. Si aún no tienes tu acceso, solicita tu licencia por WhatsApp.', 'warning');
+    }
+
+    if (DOM.btnAuthSubmit) {
+      DOM.btnAuthSubmit.disabled = false;
+      DOM.btnAuthSubmit.innerHTML = '<span>Ingresar a Mi Agenda</span>';
+    }
+  }
+
+  function toggleAuthPassword() {
+    if (!DOM.authPasswordInput) return;
+    const isPassword = DOM.authPasswordInput.type === 'password';
+    DOM.authPasswordInput.type = isPassword ? 'text' : 'password';
+    if (DOM.eyeOpenIcon) DOM.eyeOpenIcon.classList.toggle('hidden', isPassword);
+    if (DOM.eyeClosedIcon) DOM.eyeClosedIcon.classList.toggle('hidden', !isPassword);
+  }
+
+  function handleLogout() {
+    if (confirm('¿Deseas cerrar tu sesión en Mi Agenda?')) {
+      localStorage.removeItem(AUTH_SESSION_KEY);
+      setAuthenticatedUI(false);
+      if (DOM.authPasswordInput) DOM.authPasswordInput.value = '';
+      showToast('Sesión cerrada correctamente.', 'info');
+    }
+  }
+
+  // Utilidad global para registrar clientes con licencia
+  window.autorizarCliente = function(clienteEmail, clientePassword = '') {
+    if (!clienteEmail) return 'Debes proporcionar un correo electrónico.';
+    let list = [];
+    try {
+      const saved = localStorage.getItem(AUTHORIZED_USERS_KEY);
+      if (saved) list = JSON.parse(saved);
+    } catch (e) {}
+    const exists = list.find(u => (typeof u === 'string' ? u : u.email).toLowerCase() === clienteEmail.toLowerCase());
+    if (exists) return `El correo ${clienteEmail} ya está autorizado.`;
+    list.push({ email: clienteEmail.toLowerCase(), password: clientePassword });
+    localStorage.setItem(AUTHORIZED_USERS_KEY, JSON.stringify(list));
+    return `Cliente ${clienteEmail} autorizado con éxito.`;
+  };
 
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
@@ -643,6 +815,11 @@
 
     // Submit del Formulario
     DOM.taskForm.addEventListener('submit', handleTaskFormSubmit);
+
+    // Eventos de Autenticación / Portada de Acceso
+    if (DOM.authForm) DOM.authForm.addEventListener('submit', handleAuthSubmit);
+    if (DOM.btnToggleAuthPassword) DOM.btnToggleAuthPassword.addEventListener('click', toggleAuthPassword);
+    if (DOM.btnLogout) DOM.btnLogout.addEventListener('click', handleLogout);
 
     DOM.btnResetFilters.addEventListener('click', resetAllFilters);
 

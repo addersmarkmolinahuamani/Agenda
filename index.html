@@ -20,12 +20,107 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="stylesheet" href="styles.css?v=10">
+  <script>
+    try {
+      if (localStorage.getItem('agenda_auth_session')) {
+        document.documentElement.classList.add('user-authenticated');
+      }
+    } catch (e) {}
+  </script>
 </head>
 <body>
   <div class="ambient-glow glow-1"></div>
   <div class="ambient-glow glow-2"></div>
   <div class="ambient-glow glow-3"></div>
+
+  <!-- ============================================== -->
+  <!-- PORTADA DE INGRESO / ACCESO PRIVADO (AUTH)     -->
+  <!-- ============================================== -->
+  <div id="auth-screen" class="auth-screen-overlay">
+    <div class="auth-card">
+      <div class="auth-icon-box">
+        <img src="icon-192.png" alt="Mi Agenda" class="auth-icon-img" width="56" height="56">
+      </div>
+      
+      <h1 class="auth-title">Mi Agenda</h1>
+      <p class="auth-subtitle">Acceso Privado para Usuarios Autorizados</p>
+
+      <form id="auth-form" class="auth-form" novalidate>
+        <div class="auth-form-group">
+          <label for="auth-email-input" class="auth-label">CORREO AUTORIZADO</label>
+          <div class="auth-input-wrapper">
+            <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <input 
+              type="email" 
+              id="auth-email-input" 
+              class="auth-input" 
+              placeholder="tucorreo@ejemplo.com" 
+              autocomplete="email"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="auth-form-group">
+          <label for="auth-password-input" class="auth-label">CONTRASEÑA</label>
+          <div class="auth-input-wrapper">
+            <svg class="auth-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <input 
+              type="password" 
+              id="auth-password-input" 
+              class="auth-input" 
+              placeholder="Ingresa tu contraseña" 
+              autocomplete="current-password"
+              required
+            >
+            <button type="button" id="btn-toggle-auth-password" class="auth-password-toggle" aria-label="Mostrar u ocultar contraseña">
+              <svg class="eye-open-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+              <svg class="eye-closed-icon hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="btn-auth-submit" class="btn-auth-submit">
+          <span>Ingresar a Mi Agenda</span>
+        </button>
+      </form>
+
+      <!-- TARJETA LICENCIA DE PAGO ÚNICO -->
+      <div class="auth-license-card">
+        <div class="license-badge">
+          <span class="license-star">⭐</span>
+          <span class="license-badge-title">LICENCIA DE PAGO ÚNICO</span>
+        </div>
+        <p class="license-desc">
+          ¿Aún no tienes tu acceso? Adquiere tu licencia única para controlar tus finanzas y pendientes de por vida sin mensualidades.
+        </p>
+        <a 
+          href="https://wa.me/51927000936?text=Hola,%20deseo%20adquirir%20mi%20licencia%20de%20acceso%20para%20Mi%20Agenda." 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="btn-whatsapp-license"
+        >
+          <svg class="whatsapp-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.941-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.109.005.253-.041.396.303.145.347.498 1.214.541 1.301.043.087.072.188.014.304-.058.115-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.353.101.173.45 0.742 0.965 1.201.662.59 1.22.772 1.393.858.173.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.144.39-.086s1.011.477 1.184.563.289.13.332.202c.043.073.043.419-.101.824z"/>
+          </svg>
+          <span>Solicitar Licencia por WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </div>
 
   <div class="app-container">
     <!-- HEADER PRINCIPAL -->
@@ -90,6 +185,16 @@
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
           </svg>
         </button>
+
+        <!-- Botón Cerrar Sesión -->
+        <button id="btn-logout" class="theme-toggle-btn logout-header-btn" title="Cerrar sesión" aria-label="Cerrar sesión">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
+
         <button id="btn-open-new-task" class="btn-primary">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <line x1="12" y1="5" x2="12" y2="19" stroke-linecap="round"/>
@@ -472,6 +577,6 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- App Script -->
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 </body>
 </html>
