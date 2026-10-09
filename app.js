@@ -372,25 +372,31 @@
   }
 
   function updateSyncStatusUI(isConnected) {
-    if (isConnected) {
-      DOM.syncDot.className = 'sync-dot dot-online';
-      DOM.syncStatusText.textContent = 'En la Nube';
-      DOM.btnDisconnectCloud.classList.remove('hidden');
-      DOM.cloudStatusDesc.textContent = 'Conectado a Supabase. Sincronización activa con tu celular.';
-    } else {
-      DOM.syncDot.className = 'sync-dot dot-offline';
-      DOM.syncStatusText.textContent = 'Modo Local';
-      DOM.btnDisconnectCloud.classList.add('hidden');
-      DOM.cloudStatusDesc.textContent = 'Modo Local. Conecta tu Supabase para sincronizar con tu celular.';
+    if (DOM.syncDot) {
+      DOM.syncDot.className = isConnected ? 'sync-dot dot-online' : 'sync-dot dot-offline';
+    }
+    if (DOM.syncStatusText) {
+      DOM.syncStatusText.textContent = isConnected ? 'En la Nube' : 'Modo Local';
+    }
+    if (DOM.btnDisconnectCloud) {
+      DOM.btnDisconnectCloud.classList.toggle('hidden', !isConnected);
+    }
+    if (DOM.cloudStatusDesc) {
+      DOM.cloudStatusDesc.textContent = isConnected 
+        ? 'Conectado a Supabase. Sincronización activa con tu celular.' 
+        : 'Modo Local. Conecta tu Supabase para sincronizar con tu celular.';
     }
   }
 
   function setCloudSyncingState(isSyncing) {
     STATE.cloudSyncing = isSyncing;
-    if (isSyncing) {
+    if (DOM.syncDot) {
       DOM.syncDot.className = 'sync-dot dot-syncing';
+    }
+    if (DOM.syncStatusText) {
       DOM.syncStatusText.textContent = 'Sincronizando...';
-    } else {
+    }
+    if (!isSyncing) {
       updateSyncStatusUI(STATE.isCloudConnected);
     }
   }
@@ -599,30 +605,36 @@
       if (e.target === DOM.taskModal) closeTaskModal();
     });
 
-    // Modal de Nube (Supabase)
-    DOM.btnSyncSettings.addEventListener('click', openCloudModal);
-    DOM.cloudModalCloseBtn.addEventListener('click', closeCloudModal);
-    DOM.cloudModal.addEventListener('click', (e) => {
-      if (e.target === DOM.cloudModal) closeCloudModal();
-    });
+    // Modal de Nube (Supabase) - Si los controles existen en el DOM
+    if (DOM.btnSyncSettings) DOM.btnSyncSettings.addEventListener('click', openCloudModal);
+    if (DOM.cloudModalCloseBtn) DOM.cloudModalCloseBtn.addEventListener('click', closeCloudModal);
+    if (DOM.cloudModal) {
+      DOM.cloudModal.addEventListener('click', (e) => {
+        if (e.target === DOM.cloudModal) closeCloudModal();
+      });
+    }
 
-    DOM.btnSaveCloudConfig.addEventListener('click', async () => {
-      const url = DOM.supabaseUrlInput.value.trim();
-      const key = DOM.supabaseKeyInput.value.trim();
-      if (!url || !key) {
-        showToast('Por favor ingresa tanto la URL como la Anon Key de Supabase.', 'warning');
-        return;
-      }
-      const success = await connectToSupabase(url, key, true);
-      if (success) {
+    if (DOM.btnSaveCloudConfig) {
+      DOM.btnSaveCloudConfig.addEventListener('click', async () => {
+        const url = DOM.supabaseUrlInput ? DOM.supabaseUrlInput.value.trim() : '';
+        const key = DOM.supabaseKeyInput ? DOM.supabaseKeyInput.value.trim() : '';
+        if (!url || !key) {
+          showToast('Por favor ingresa tanto la URL como la Anon Key de Supabase.', 'warning');
+          return;
+        }
+        const success = await connectToSupabase(url, key, true);
+        if (success) {
+          closeCloudModal();
+        }
+      });
+    }
+
+    if (DOM.btnDisconnectCloud) {
+      DOM.btnDisconnectCloud.addEventListener('click', () => {
+        disconnectCloud();
         closeCloudModal();
-      }
-    });
-
-    DOM.btnDisconnectCloud.addEventListener('click', () => {
-      disconnectCloud();
-      closeCloudModal();
-    });
+      });
+    }
 
     // Toggle de Fecha en el Modal
     DOM.taskHasDateToggle.addEventListener('change', (e) => {
@@ -681,8 +693,8 @@
     // Atajos de teclado
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (!DOM.taskModal.classList.contains('hidden')) closeTaskModal();
-        if (!DOM.cloudModal.classList.contains('hidden')) closeCloudModal();
+        if (DOM.taskModal && !DOM.taskModal.classList.contains('hidden')) closeTaskModal();
+        if (DOM.cloudModal && !DOM.cloudModal.classList.contains('hidden')) closeCloudModal();
       }
     });
   }
@@ -691,19 +703,22 @@
   // MODAL DE NUBE (SUPABASE)
   // ==========================================
   function openCloudModal() {
+    if (!DOM.cloudModal) return;
     const savedConfig = localStorage.getItem(CLOUD_CONFIG_KEY);
     if (savedConfig) {
       try {
         const { url, key } = JSON.parse(savedConfig);
-        DOM.supabaseUrlInput.value = url || '';
-        DOM.supabaseKeyInput.value = key || '';
+        if (DOM.supabaseUrlInput) DOM.supabaseUrlInput.value = url || '';
+        if (DOM.supabaseKeyInput) DOM.supabaseKeyInput.value = key || '';
       } catch (e) {}
     }
     DOM.cloudModal.classList.remove('hidden');
   }
 
   function closeCloudModal() {
-    DOM.cloudModal.classList.add('hidden');
+    if (DOM.cloudModal) {
+      DOM.cloudModal.classList.add('hidden');
+    }
   }
 
   // ==========================================
