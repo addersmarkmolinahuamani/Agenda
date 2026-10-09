@@ -281,25 +281,27 @@
     });
     if (foundLocal) return true;
 
-    // 3. Verificación con Supabase si está disponible (tabla authorized_users)
-    if (STATE.supabaseClient) {
-      try {
-        const { data } = await STATE.supabaseClient
+    // 3. Verificación con Supabase (tabla authorized_users)
+    try {
+      const client = STATE.supabaseClient || (window.supabase && window.supabase.createClient 
+        ? window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY) 
+        : null);
+
+      if (client) {
+        const { data, error } = await client
           .from('authorized_users')
           .select('*')
           .eq('email', normalizedEmail)
           .limit(1);
 
-        if (data && data.length > 0) {
+        if (!error && data && data.length > 0) {
           const user = data[0];
           if (!user.password || user.password === password) {
             return true;
           }
         }
-      } catch (err) {
-        // Si no existe la tabla en Supabase, continuar sin fallar
       }
-    }
+    } catch (err) {}
 
     return false;
   }
@@ -330,7 +332,10 @@
       };
       localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
       setAuthenticatedUI(true);
+      loadLocalTasks();
+      renderAll();
       showToast('¡Bienvenido a Mi Agenda!', 'success');
+      await initSupabaseFromStorage();
     } else {
       showToast('Correo no autorizado o contraseña incorrecta. Si aún no tienes tu acceso, solicita tu licencia por WhatsApp.', 'warning');
     }
@@ -352,25 +357,49 @@
   function handleLogout() {
     if (confirm('¿Deseas cerrar tu sesión en Mi Agenda?')) {
       localStorage.removeItem(AUTH_SESSION_KEY);
+      STATE.tasks = [];
       setAuthenticatedUI(false);
+      renderAll();
       if (DOM.authPasswordInput) DOM.authPasswordInput.value = '';
       showToast('Sesión cerrada correctamente.', 'info');
     }
   }
 
   // Utilidad global para registrar clientes con licencia
-  window.autorizarCliente = function(clienteEmail, clientePassword = '') {
+  window.autorizarCliente = async function(clienteEmail, clientePassword = '', nombre = '') {
     if (!clienteEmail) return 'Debes proporcionar un correo electrónico.';
+    const normalized = clienteEmail.trim().toLowerCase();
+
+    // Guardar en Supabase si está disponible
+    try {
+      const client = STATE.supabaseClient || (window.supabase && window.supabase.createClient 
+        ? window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY) 
+        : null);
+
+      if (client) {
+        await client.from('authorized_users').upsert([{
+          email: normalized,
+          password: clientePassword,
+          nombre: nombre || 'Cliente'
+        }]);
+      }
+    } catch (err) {
+      console.warn('Error registrando en Supabase:', err);
+    }
+
     let list = [];
     try {
       const saved = localStorage.getItem(AUTHORIZED_USERS_KEY);
       if (saved) list = JSON.parse(saved);
     } catch (e) {}
-    const exists = list.find(u => (typeof u === 'string' ? u : u.email).toLowerCase() === clienteEmail.toLowerCase());
-    if (exists) return `El correo ${clienteEmail} ya está autorizado.`;
-    list.push({ email: clienteEmail.toLowerCase(), password: clientePassword });
+    const existsIdx = list.findIndex(u => (typeof u === 'string' ? u : u.email).toLowerCase() === normalized);
+    if (existsIdx !== -1) {
+      list[existsIdx] = { email: normalized, password: clientePassword, nombre: nombre || 'Cliente' };
+    } else {
+      list.push({ email: normalized, password: clientePassword, nombre: nombre || 'Cliente' });
+    }
     localStorage.setItem(AUTHORIZED_USERS_KEY, JSON.stringify(list));
-    return `Cliente ${clienteEmail} autorizado con éxito.`;
+    return `Cliente ${normalized} autorizado con éxito.`;
   };
 
   // ==========================================
@@ -444,8 +473,17 @@
 
     try {
       if (STATE.supabaseClient) {
+        const userEmail = getCurrentUserEmail();
         await pushAllTasksToCloud();
-        const { data, error } = await STATE.supabaseClient.from('tasks').select('*').limit(500);
+
+        let query = STATE.supabaseClient.from('tasks').select('*');
+        if (userEmail === MASTER_EMAIL.toLowerCase()) {
+          query = query.or(`user_email.eq.${userEmail},user_email.is.null`);
+        } else {
+          query = query.eq('user_email', userEmail);
+        }
+
+        const { data, error } = await query.limit(500);
         if (!error && data) {
           STATE.tasks = data.map(dbRowToTask);
           saveLocalTasks();
@@ -519,9 +557,17 @@
 
     try {
       const client = window.supabase.createClient(url.trim(), key.trim());
+      const userEmail = getCurrentUserEmail();
       
-      // Probar lectura de la tabla tasks
-      const { data, error } = await client.from('tasks').select('*').limit(500);
+      // Probar lectura de la tabla tasks filtrando exclusivamente por el usuario conectado
+      let query = client.from('tasks').select('*');
+      if (userEmail === MASTER_EMAIL.toLowerCase()) {
+        query = query.or(`user_email.eq.${userEmail},user_email.is.null`);
+      } else {
+        query = query.eq('user_email', userEmail);
+      }
+
+      const { data, error } = await query.limit(500);
 
       if (error) {
         throw error;
@@ -534,16 +580,19 @@
       localStorage.setItem(CLOUD_CONFIG_KEY, JSON.stringify({ url: url.trim(), key: key.trim() }));
       updateSyncStatusUI(true);
 
-      // Si hay datos remotos, sincronizar
+      // Si hay datos remotos de este usuario, sincronizar
       if (data && data.length > 0) {
         STATE.tasks = data.map(dbRowToTask);
         saveLocalTasks();
         renderAll();
         if (isUserAction) showToast(`¡Conectado! Se sincronizaron ${data.length} pendientes desde la nube.`, 'success');
       } else if (STATE.tasks.length > 0) {
-        // La tabla remota está vacía, subir las tareas locales existentes
+        // Subir las tareas locales del usuario actual a Supabase
         await pushAllTasksToCloud();
         if (isUserAction) showToast('¡Conectado! Tareas locales subidas a Supabase.', 'success');
+      } else {
+        STATE.tasks = [];
+        renderAll();
       }
 
       // Suscribirse a cambios en tiempo real (Realtime)
@@ -589,6 +638,16 @@
 
   function handleRealtimeEvent(payload) {
     const { eventType, new: newRecord, old: oldRecord } = payload;
+    const currentEmail = getCurrentUserEmail();
+
+    // Aislamiento de privacidad: solo procesar si la tarea pertenece a este usuario
+    const recordEmail = ((newRecord && newRecord.user_email) || (oldRecord && oldRecord.user_email) || '').toLowerCase();
+    if (recordEmail && recordEmail !== currentEmail) {
+      return; // Ignorar silenciosamente cambios de otras personas
+    }
+    if (!recordEmail && currentEmail !== MASTER_EMAIL.toLowerCase()) {
+      return;
+    }
     
     if (eventType === 'INSERT') {
       const task = dbRowToTask(newRecord);
@@ -632,7 +691,11 @@
         const row = taskToDbRow(task);
         await STATE.supabaseClient.from('tasks').upsert([row]);
       } else if (action === 'delete') {
-        await STATE.supabaseClient.from('tasks').delete().eq('id', task.id);
+        await STATE.supabaseClient
+          .from('tasks')
+          .delete()
+          .eq('id', task.id)
+          .eq('user_email', getCurrentUserEmail());
       }
     } catch (e) {
       console.error('Error sincronizando cambio en Supabase:', e);
@@ -681,6 +744,7 @@
   function taskToDbRow(task) {
     return {
       id: task.id,
+      user_email: getCurrentUserEmail(),
       title: task.title,
       notes: task.notes || null,
       has_due_date: Boolean(task.hasDueDate),
@@ -697,6 +761,7 @@
   function dbRowToTask(row) {
     return {
       id: row.id,
+      userEmail: row.user_email || null,
       title: row.title,
       notes: row.notes || '',
       hasDueDate: Boolean(row.has_due_date),
@@ -711,10 +776,20 @@
   }
 
   // ==========================================
-  // PERSISTENCIA LOCAL (OFFLINE FIRST)
+  // PERSISTENCIA LOCAL (OFFLINE FIRST AISLADA POR USUARIO)
   // ==========================================
+  function getCurrentUserEmail() {
+    const session = getAuthSession();
+    return (session && session.email) ? session.email.toLowerCase() : MASTER_EMAIL.toLowerCase();
+  }
+
+  function getUserStorageKey() {
+    return `${STORAGE_KEY}_${getCurrentUserEmail()}`;
+  }
+
   function loadLocalTasks() {
-    const saved = localStorage.getItem(STORAGE_KEY);
+    const userKey = getUserStorageKey();
+    const saved = localStorage.getItem(userKey);
     if (saved) {
       try {
         STATE.tasks = JSON.parse(saved);
@@ -723,13 +798,28 @@
         console.error('Error leyendo tareas del almacenamiento local:', e);
       }
     }
-    // Demostración inicial amigable
-    STATE.tasks = generateSampleTasks();
-    saveLocalTasks();
+
+    // Migración para la cuenta administradora si existían tareas en la clave global previa
+    if (getCurrentUserEmail() === MASTER_EMAIL.toLowerCase()) {
+      const legacySaved = localStorage.getItem(STORAGE_KEY);
+      if (legacySaved) {
+        try {
+          STATE.tasks = JSON.parse(legacySaved);
+          saveLocalTasks();
+          return;
+        } catch (e) {}
+      }
+      STATE.tasks = generateSampleTasks();
+      saveLocalTasks();
+    } else {
+      // Cuenta nueva de cliente: lista vacía
+      STATE.tasks = [];
+      saveLocalTasks();
+    }
   }
 
   function saveLocalTasks() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE.tasks));
+    localStorage.setItem(getUserStorageKey(), JSON.stringify(STATE.tasks));
   }
 
   function generateSampleTasks() {
