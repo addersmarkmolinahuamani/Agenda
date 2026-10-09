@@ -98,8 +98,6 @@
 
     listWithoutDate: document.getElementById('list-without-date'),
     countNodateBadge: document.getElementById('count-nodate-badge'),
-    quickAddInput: document.getElementById('quick-add-input'),
-    quickAddBtn: document.getElementById('quick-add-btn'),
 
     globalEmptyState: document.getElementById('global-empty-state'),
 
@@ -673,31 +671,6 @@
     DOM.metricCards.dueSoon.addEventListener('click', () => setFilterPill('with-date'));
     DOM.metricCards.noDate.addEventListener('click', () => setFilterPill('without-date'));
     DOM.metricCards.completed.addEventListener('click', () => setFilterPill('completed'));
-
-    // Input rápido de pendientes sin fecha
-    DOM.quickAddBtn.addEventListener('click', handleQuickAdd);
-    DOM.quickAddInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        handleQuickAdd();
-      }
-    });
-
-    // Protección activa contra autocompletado automático de credenciales/correos del navegador
-    const sanitizeQuickAddAutofill = () => {
-      if (DOM.quickAddInput) {
-        const val = DOM.quickAddInput.value;
-        // Si el navegador intentó inyectar un email o valor guardado sin intervención del usuario
-        if (val && val.includes('@') && !DOM.quickAddInput.matches(':focus')) {
-          DOM.quickAddInput.value = '';
-        }
-      }
-    };
-    sanitizeQuickAddAutofill();
-    setTimeout(sanitizeQuickAddAutofill, 80);
-    setTimeout(sanitizeQuickAddAutofill, 300);
-    setTimeout(sanitizeQuickAddAutofill, 800);
-    setTimeout(sanitizeQuickAddAutofill, 2000);
 
     // Acordeón de tareas realizadas
     DOM.headerCompletedToggle.addEventListener('click', () => {
@@ -1288,33 +1261,6 @@
     showToast(`Pendiente programado para el ${formatReadableDate(targetDateISO)}`, 'success');
     renderAll();
     await syncTaskToCloud(task, 'upsert');
-  }
-
-  async function handleQuickAdd() {
-    const title = DOM.quickAddInput.value.trim();
-    if (!title) return;
-
-    const newTask = {
-      id: 't-' + Date.now(),
-      title: title,
-      notes: '',
-      hasDueDate: false,
-      dueDate: null,
-      dueTime: null,
-      priority: 'medium',
-      category: 'personal',
-      completed: false,
-      completedAt: null,
-      createdAt: Date.now()
-    };
-
-    STATE.tasks.unshift(newTask);
-    saveLocalTasks();
-    DOM.quickAddInput.value = '';
-
-    showToast('Pendiente sin fecha agregado.', 'success');
-    renderAll();
-    await syncTaskToCloud(newTask, 'upsert');
   }
 
   // ==========================================

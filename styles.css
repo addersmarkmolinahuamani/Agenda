@@ -1156,53 +1156,6 @@ body.light-theme .btn-icon-sm:hover {
   color: var(--text-dim);
 }
 
-.quick-add-box {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-
-.quick-add-box input {
-  flex: 1;
-  background: var(--bg-glass-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  color: var(--text-main);
-  font-family: var(--font-main);
-  font-size: 0.82rem;
-  outline: none;
-  transition: all var(--transition-fast);
-}
-
-.quick-add-box input:focus {
-  border-color: var(--color-cyan);
-}
-
-.quick-add-btn {
-  background: var(--color-cyan-soft);
-  color: var(--color-cyan);
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  border-radius: var(--radius-sm);
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.quick-add-btn:hover {
-  background: var(--color-cyan);
-  color: #fff;
-}
-
-.quick-add-btn svg {
-  width: 16px;
-  height: 16px;
-}
-
 .compact-list .task-item {
   display: flex;
   flex-direction: column;

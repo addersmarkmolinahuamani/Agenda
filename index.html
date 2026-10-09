@@ -20,7 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <div class="ambient-glow glow-1"></div>
@@ -281,17 +281,6 @@
                   </div>
                 </div>
                 <span class="group-count bg-soft-blue" id="count-nodate-badge">0</span>
-              </div>
-
-              <!-- Input rápido para agregar pendientes sin fecha al instante -->
-              <div class="quick-add-box">
-                <input type="text" id="quick-add-input" name="no_autofill_quick_title" placeholder="+ Escribe un pendiente aquí y presiona Enter..." autocomplete="new-password" autocorrect="off" autocapitalize="sentences" spellcheck="false" data-lpignore="true" data-form-type="other" readonly onfocus="this.removeAttribute('readonly');" onblur="if(!this.value) this.setAttribute('readonly', 'readonly');">
-                <button id="quick-add-btn" class="quick-add-btn" title="Guardar">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="12" y1="5" x2="12" y2="19"></line>
-                    <line x1="5" y1="12" x2="19" y2="12"></line>
-                  </svg>
-                </button>
               </div>
 
               <div class="task-list compact-list" id="list-without-date"></div>
@@ -573,6 +562,6 @@
   <!-- Supabase CDN Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- App Script -->
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
