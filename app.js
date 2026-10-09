@@ -683,6 +683,22 @@
       }
     });
 
+    // Protección activa contra autocompletado automático de credenciales/correos del navegador
+    const sanitizeQuickAddAutofill = () => {
+      if (DOM.quickAddInput) {
+        const val = DOM.quickAddInput.value;
+        // Si el navegador intentó inyectar un email o valor guardado sin intervención del usuario
+        if (val && val.includes('@') && !DOM.quickAddInput.matches(':focus')) {
+          DOM.quickAddInput.value = '';
+        }
+      }
+    };
+    sanitizeQuickAddAutofill();
+    setTimeout(sanitizeQuickAddAutofill, 80);
+    setTimeout(sanitizeQuickAddAutofill, 300);
+    setTimeout(sanitizeQuickAddAutofill, 800);
+    setTimeout(sanitizeQuickAddAutofill, 2000);
+
     // Acordeón de tareas realizadas
     DOM.headerCompletedToggle.addEventListener('click', () => {
       DOM.groupCompleted.classList.toggle('collapsed');
