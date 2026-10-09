@@ -73,11 +73,7 @@
       completed: document.getElementById('metric-filter-completed')
     },
 
-    // Filtros y Búsqueda
-    searchInput: document.getElementById('search-input'),
-    clearSearchBtn: document.getElementById('clear-search-btn'),
-    filterPills: document.querySelectorAll('.filter-pill'),
-    priorityFilterSelect: document.getElementById('priority-filter-select'),
+    // Filtros
     filterIndicator: document.getElementById('filter-indicator'),
     filterIndicatorText: document.getElementById('filter-indicator-text'),
     btnResetFilters: document.getElementById('btn-reset-filters'),
@@ -636,34 +632,6 @@
     // Submit del Formulario
     DOM.taskForm.addEventListener('submit', handleTaskFormSubmit);
 
-    // Búsqueda y Filtros
-    DOM.searchInput.addEventListener('input', (e) => {
-      STATE.searchQuery = e.target.value.trim().toLowerCase();
-      DOM.clearSearchBtn.classList.toggle('hidden', STATE.searchQuery.length === 0);
-      renderAll();
-    });
-
-    DOM.clearSearchBtn.addEventListener('click', () => {
-      DOM.searchInput.value = '';
-      STATE.searchQuery = '';
-      DOM.clearSearchBtn.classList.add('hidden');
-      renderAll();
-    });
-
-    DOM.priorityFilterSelect.addEventListener('change', (e) => {
-      STATE.priorityFilter = e.target.value;
-      renderAll();
-    });
-
-    DOM.filterPills.forEach(pill => {
-      pill.addEventListener('click', () => {
-        DOM.filterPills.forEach(p => p.classList.remove('active'));
-        pill.classList.add('active');
-        STATE.activeFilter = pill.dataset.filter;
-        renderAll();
-      });
-    });
-
     DOM.btnResetFilters.addEventListener('click', resetAllFilters);
 
     // Clics en tarjetas de métricas para filtrar rápidamente
@@ -767,24 +735,15 @@
   }
 
   function setFilterPill(filterType) {
-    DOM.filterPills.forEach(pill => {
-      if (pill.dataset.filter === filterType) {
-        pill.classList.add('active');
-      } else {
-        pill.classList.remove('active');
-      }
-    });
     STATE.activeFilter = filterType;
     renderAll();
   }
 
   function resetAllFilters() {
-    DOM.searchInput.value = '';
     STATE.searchQuery = '';
-    DOM.clearSearchBtn.classList.add('hidden');
-    DOM.priorityFilterSelect.value = 'all';
     STATE.priorityFilter = 'all';
-    setFilterPill('all');
+    STATE.activeFilter = 'all';
+    renderAll();
   }
 
   // ==========================================
